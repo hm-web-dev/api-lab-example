@@ -11,18 +11,23 @@ I remember an email chain trend where people would send books to each other and 
 5. *STRETCH GOAL 2* If I have time, I want to create a recommendation engine for people looking for new books.
 6. I considered making an Animal Crossing DB but there's not much front end possibilities with that, and I also couldn't find a ready-made database (only JSON and I think it was going to be too tedious to translate it to SQLite).
 
-## Lab 3: Submission 
+## Lab 3: Submission
+
+Credit for original book database from https://github.com/bbrumm/databasestar/tree/main/sample_databases/sample_db_gravity/mysql 
 
 **SEARCH AUTHOR**
-localhost:3999/search/author (get endpoint)
+
+`localhost:3999/search/author` (GET endpoint)
 -- pass in "author" : "authorName" as a JSON body
 
 **SEARCH BY TITLE**
-localhost:3999/search/book (get endpoint)
+
+`localhost:3999/search/book` (GET endpoint)
 -- pass in "title" : "bookTitle" as a JSON body
 
 **CREATE BOOK TO TRADE**
-localhost:3999/create/trade (post endpoint)
+
+`localhost:3999/create/trade` (POST endpoint)
 -- pass in "title" : "bookTitle" as a JSON body
 -- plan is to have user automatically passed as authentication 
 
