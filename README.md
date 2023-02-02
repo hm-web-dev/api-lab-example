@@ -1,4 +1,5 @@
 # Bookstore API
+
 My idea is to build a HM 'bookstore' where people can trade books within the community.
 I remember an email chain trend where people would send books to each other and thought it'd be fun to build it for the school.
 
@@ -13,21 +14,41 @@ I remember an email chain trend where people would send books to each other and 
 
 ## Lab 3: Submission
 
-Credit for original book database from https://github.com/bbrumm/databasestar/tree/main/sample_databases/sample_db_gravity/mysql 
+Credit for original book database from <https://github.com/bbrumm/databasestar/tree/main/sample_databases/sample_db_gravity/mysql>
 
-**SEARCH AUTHOR**
+### SEARCH AUTHOR
 
 `localhost:3999/search/author` (GET endpoint)
 -- pass in "author" : "authorName" as a JSON body
 
-**SEARCH BY TITLE**
+### SEARCH BY TITLE
 
 `localhost:3999/search/book` (GET endpoint)
 -- pass in "title" : "bookTitle" as a JSON body
 
-**CREATE BOOK TO TRADE**
+### CREATE USER TO TRADE
 
-`localhost:3999/create/trade` (POST endpoint)
+`localhost:3999/user/create` (POST endpoint)
+-- example JSON body:
+
+```JSON
+{
+    "first_name" : "xxx", 
+    "last_name" : "xxx", 
+    "email": "name@example.com"
+}
+```
+
+**OTHER ENDPOINTS** (not made)
+-- For all these customer-specific endpoints, plan is to have user automatically passed as authentication later
+
+`localhost:3999/pastTrades/` (GET endpoint)
+-- view past trades
+`localhost:3999/trade/create` (POST endpoint)
 -- pass in "title" : "bookTitle" as a JSON body
--- plan is to have user automatically passed as authentication 
-
+`localhost:3999/trade/:tradeid/claim` (PUT endpoint)
+-- someone can claim a trade
+`localhost:3999/trade/:tradeid/cancel` (PUT endpoint)
+-- someone can cancel their trade
+`localhost:3999/trade/:tradeid/deliver` (PUT endpoint)
+-- someone can mark a trade as TRADED

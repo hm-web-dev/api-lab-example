@@ -26,11 +26,12 @@ app.get('/', (req, res)=> res.send({"welcome": "it works"}))
 
 // PAST ORDERS 
 
-// LOGIN 
+// LOGIN (if I learn authentication)
+
+// CREATE TRADE // given a json object of an array of books.  
 
 // CREATE USER
-
-// CREATE ORDER // given a json object of an array of books.  
+app.post('/user/create', db.createUser)
 
 // FILTER BY Author 
 app.get('/search/author', search.authorFilter)
