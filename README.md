@@ -16,15 +16,21 @@ I remember an email chain trend where people would send books to each other and 
 
 Credit for original book database from <https://github.com/bbrumm/databasestar/tree/main/sample_databases/sample_db_gravity/mysql>
 
+### Run the app
+
+1. Clone the repo 
+2. Run `npm install` to install dependencies
+3. Run `nodemon index.js` to start the server
+
 ### SEARCH AUTHOR
 
 `localhost:3999/search/author` (GET endpoint)
--- pass in "author" : "authorName" as a JSON body
+-- pass in "author" : "YOUR AUTHOR HERE" as a JSON body
 
 ### SEARCH BY TITLE
 
 `localhost:3999/search/book` (GET endpoint)
--- pass in "title" : "bookTitle" as a JSON body
+-- pass in "book" : "YOUR BOOK TITLE HERE" as a JSON body
 
 ### CREATE USER TO TRADE
 
