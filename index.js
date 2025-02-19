@@ -17,6 +17,27 @@ const PORT = 3999;
 app.use(express.json());
 
 
+// Handle CORS w/ client
+// For more information about CORS (Cross-Origin Resource Sharing):
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+app.use((req, res, next) => {
+  // Allow access from multiple origins
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://www.figma.com"
+  ];
+  const origin = req.headers.origin;
+  console.log("origin is " + origin);
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  // Allow specific requests
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Pass to next layer of middleware
+  next();
+});
 //-----------------------------
 //#region Database Routes
 //-----------------------------
@@ -32,6 +53,9 @@ app.get('/', (req, res)=> res.send({"welcome": "it works"}))
 
 // CREATE USER
 app.post('/user/create', db.createUser)
+
+// GET USER 
+app.get('/user/:id', db.getUser)
 
 // FILTER BY Author 
 app.get('/search/author', search.authorFilter)

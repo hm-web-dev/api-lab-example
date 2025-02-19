@@ -33,6 +33,25 @@ const createUser = (req, res) => {
     )
 }
 
+const getUser = (req, res) => {
+    const query = `
+    SELECT * FROM customer WHERE customer_id = ?
+    `
+    db.get(query, [req.params.id], (error, result) => {
+        if (error) {
+            console.error(error.message);
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        if (result) {
+            res.json(result);
+        } else {
+            // If nothing is returned, there is no id
+            res.sendStatus(404);
+        }
+    })
+}
+
 // could curry author and book and give the query and req body
 const authorFilter = (req, res) => {
     const query = `
@@ -96,4 +115,5 @@ module.exports = {
     authorFilter,
     bookFilter,
     createUser,
+    getUser,
 }
