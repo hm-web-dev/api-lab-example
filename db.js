@@ -20,8 +20,8 @@ const createUser = (req, res) => {
     ],
         function (err) {
             if (err) {
-                console.error(error.message);
-                res.status(400).json({ error: error.message });
+                console.error(err.message);
+                res.status(400).json({ error: err.message });
                 return;
             }
             else {
@@ -33,11 +33,57 @@ const createUser = (req, res) => {
     )
 }
 
+// This is a trade function that creates a new trade in the database
+// Between a lender user and a borrower user
+const createTrade = (req, res) => { 
+    // borrower (or lender) can be null
+    const createdAt = new Date().toISOString();
+    
+    const query =
+        `
+    INSERT INTO trade(lender_id, borrower_id, book_id, status, created_at)
+    VALUES (?, ?, ?, 'pending', ?)
+    `
+    db.run(query, [
+        req.body.lender_id, req.body.borrower_id, req.body.book_id, createdAt
+    ],
+        function (err) {
+            if (err) {
+                console.error(err.message);
+                res.status(400).json({ error: err.message });
+                return;
+            }
+            else {
+                res.json({ id: this.lastID });
+            }
+        }
+    )
+}
+
 const getUser = (req, res) => {
     const query = `
     SELECT * FROM customer WHERE customer_id = ?
     `
     db.get(query, [req.params.id], (error, result) => {
+        if (error) {
+            console.error(error.message);
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        if (result) {
+            res.json(result);
+        } else {
+            // If nothing is returned, there is no id
+            res.sendStatus(404);
+        }
+    })
+}
+
+const getUserTrades = (req, res) => {  
+    const query = `
+    SELECT * FROM trade WHERE lender_id = ? OR borrower_id = ?
+    `
+    db.all(query, [req.params.id, req.params.id], (error, result) => {
         if (error) {
             console.error(error.message);
             res.status(400).json({ error: error.message });
@@ -116,4 +162,6 @@ module.exports = {
     bookFilter,
     createUser,
     getUser,
+    createTrade,
+    getUserTrades,
 }

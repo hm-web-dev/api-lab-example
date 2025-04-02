@@ -45,13 +45,51 @@ Credit for original book database from <https://github.com/bbrumm/databasestar/t
 }
 ```
 
+### GET USER TRADES
+`localhost:3999/user/:id/trades` (GET endpoint)
+
+Example Response: 
+```
+[
+    {
+        "lender_id": 3,
+        "borrower_id": null,
+        "trade_id": 1,
+        "status": "pending",
+        "created_at": "2025-04-02T18:08:23.732Z",
+        "book_id": 1616
+    }
+]
+```
+
+### CREATE TRADE
+`localhost:3999/trade/create` (POST endpoint)
+-- example JSON body:
+```JSON
+{
+    "lender_id" : 1,
+    "borrower_id" : 2,
+    "book_id" : 3,
+}
+```
+
+-- example JSON response:
+```
+[
+    {
+        "lender_id": 3,
+        "borrower_id": null,
+        "trade_id": 1,
+        "status": "pending",
+        "created_at": "2025-04-02T18:08:23.732Z",
+        "book_id": 1616
+    }
+]
+```
+
 **OTHER ENDPOINTS** (not made)
 -- For all these customer-specific endpoints, plan is to have user automatically passed as authentication later
 
-`localhost:3999/pastTrades/` (GET endpoint)
--- view past trades
-`localhost:3999/trade/create` (POST endpoint)
--- pass in "title" : "bookTitle" as a JSON body
 `localhost:3999/trade/:tradeid/claim` (PUT endpoint)
 -- someone can claim a trade
 `localhost:3999/trade/:tradeid/cancel` (PUT endpoint)

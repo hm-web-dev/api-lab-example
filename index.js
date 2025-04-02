@@ -23,7 +23,7 @@ app.use(express.json());
 app.use((req, res, next) => {
   // Allow access from multiple origins
   const allowedOrigins = [
-    "http://localhost:5173",
+    "http://localhost:5174",
     "https://www.figma.com"
   ];
   const origin = req.headers.origin;
@@ -45,12 +45,6 @@ app.use((req, res, next) => {
 app.get('/', (req, res)=> res.send({"welcome": "it works"}))
 /* CRUD DB Routes */ 
 
-// PAST ORDERS 
-
-// LOGIN (if I learn authentication)
-
-// CREATE TRADE // given a json object of an array of books.  
-
 // CREATE USER
 app.post('/user/create', db.createUser)
 
@@ -63,6 +57,14 @@ app.get('/search/author', search.authorFilter)
 // FILTER BY Book 
 app.get('/search/book', search.bookFilter)
 
+// CUSTOMER-SPECIFIC ENDPOINTS
+// PAST ORDERS 
+app.get('/user/:id/trades', db.getUserTrades)
+
+// CREATE TRADE // given a json object of an array of books.  
+app.post('/trade/create', db.createTrade)
+
+// LOGIN (if I implement authentication)
 
 
 
