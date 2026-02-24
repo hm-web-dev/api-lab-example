@@ -4,13 +4,16 @@ This file provides context for AI assistants working in this repository.
 
 ## Project Overview
 
-A community book-trading REST API built with Node.js and Express, backed by a pre-populated SQLite database. Users can search books, create accounts, and post/claim trades. This is an educational project (school lab assignment) and is actively under development.
+A community book-trading REST API built with Node.js, Express, and TypeScript, backed by a pre-populated SQLite database. Users can search books, create accounts, and post/claim trades. This is an educational project (school lab assignment) and is actively under development.
 
 ## Running the App
 
 ```bash
 npm install          # install dependencies
-nodemon index.js     # start dev server with auto-reload (port 3999)
+npm run dev          # start dev server with auto-reload via ts-node (port 3999)
+npm run build        # compile TypeScript to dist/
+npm run start        # run compiled output from dist/
+npm run typecheck    # type-check without emitting files
 ```
 
 There is no test runner configured. The `npm test` script is a placeholder that exits with an error.
@@ -19,12 +22,16 @@ There is no test runner configured. The `npm test` script is a placeholder that 
 
 ```
 api-lab-example/
-├── index.js              # Express app entry point — middleware + route definitions
-├── db.js                 # All database query functions (SQLite3)
-├── search.js             # Validation middleware that wraps db search calls
-├── cart.js               # Empty placeholder for future cart functionality
+├── src/
+│   ├── index.ts          # Express app entry point — middleware + route definitions
+│   ├── db.ts             # All database query functions (SQLite3)
+│   ├── search.ts         # Validation middleware that wraps db search calls
+│   ├── cart.ts           # Empty placeholder for future cart functionality
+│   └── types.ts          # Shared TypeScript interfaces (Customer, Trade, BookResult)
+├── dist/                 # Compiled JS output (gitignored — run `npm run build` to generate)
 ├── api-lab-example.db    # Pre-populated SQLite database (do not delete)
 ├── bookstore_api.drawio  # ERD diagram (open in draw.io)
+├── tsconfig.json         # TypeScript compiler configuration
 ├── package.json
 └── README.md
 ```
@@ -34,18 +41,26 @@ api-lab-example/
 ### Request Flow
 
 ```
-HTTP Request → index.js route → search.js (validation, search routes only) → db.js (query) → response
+HTTP Request → src/index.ts route → src/search.ts (validation, search routes only) → src/db.ts (query) → response
 ```
 
-- **index.js**: Registers middleware (JSON parsing, CORS) and mounts all routes. No business logic lives here.
-- **search.js**: Input validation layer. Currently validates that search strings are defined and longer than 3 characters before forwarding to `db.js`.
-- **db.js**: All SQL queries. Functions are Express route handlers (accept `req, res`) and are exported directly for use as route callbacks.
-- **cart.js**: Empty file — intended for a future shopping cart feature.
+- **src/index.ts**: Registers middleware (JSON parsing, CORS) and mounts all routes. No business logic lives here.
+- **src/search.ts**: Input validation layer. Currently validates that search strings are defined and longer than 3 characters before forwarding to `db.ts`.
+- **src/db.ts**: All SQL queries. Functions are Express route handlers (`(req: Request, res: Response): void`) and are exported for use as route callbacks.
+- **src/types.ts**: Shared interfaces — `Customer`, `Trade`, `BookResult`. Import from here when working with DB results.
+- **src/cart.ts**: Empty file — intended for a future shopping cart feature.
+
+### TypeScript Configuration
+
+- **strict mode** enabled — all types must be explicit
+- **esModuleInterop** enabled — use `import x from 'y'` syntax throughout
+- **rootDir**: `./src`, **outDir**: `./dist`
+- The SQLite DB file path uses `path.join(__dirname, '..', 'api-lab-example.db')` so it resolves correctly whether running via `ts-node src/` or compiled `node dist/`
 
 ### Database
 
-- SQLite3 file: `api-lab-example.db` (in project root)
-- Connection opened once at module load in `db.js`
+- SQLite3 file: `api-lab-example.db` (project root)
+- Connection opened once at module load in `src/db.ts`
 - Uses the callback-based `sqlite3` API (`db.run`, `db.get`, `db.all`)
 - **Always use parameterized queries** (`?` placeholders) — the existing code does this consistently
 
@@ -59,7 +74,7 @@ HTTP Request → index.js route → search.js (validation, search routes only) �
 | `author` | `author_id`, `author_name` |
 | `book_author` | `book_id`, `author_id` (join table) |
 
-Trade `status` starts as `'pending'` on creation. Updating status (`claim`, `cancel`, `deliver`) is not yet implemented.
+Trade `status` starts as `'pending'` on creation. Valid values are defined in the `Trade` interface: `'pending' | 'claimed' | 'cancelled' | 'delivered'`.
 
 ## Implemented Endpoints
 
@@ -107,23 +122,26 @@ These are documented in `README.md` but not yet built:
 - `PUT /trade/:tradeid/cancel` — cancel a trade
 - `PUT /trade/:tradeid/deliver` — mark trade as completed
 
-When implementing these, follow the pattern in `db.js`: write the SQL handler there and register the route in `index.js`.
+When implementing these, write the handler in `src/db.ts` as `(req: Request, res: Response): void`, then register the route in `src/index.ts`.
 
 ## CORS Configuration
 
-CORS is handled by a custom middleware in `index.js`. Allowed origins:
+CORS is handled by a custom middleware in `src/index.ts`. Allowed origins:
 - `http://localhost:5174` (local frontend dev server)
 - `https://www.figma.com`
 
-To add a new allowed origin, add it to the `allowedOrigins` array in `index.js`.
+To add a new allowed origin, add it to the `allowedOrigins` array in `src/index.ts`.
 
 ## Code Conventions
 
+- **Language**: TypeScript with `strict: true`. All new functions must have explicit parameter and return types.
+- **Imports**: Use ES module `import`/`export` syntax (compiled to CommonJS by `tsc`).
+- **Route handlers**: Signature is `(req: Request, res: Response): void`. Import `Request` and `Response` from `express`.
+- **DB result types**: Use types from `src/types.ts` when typing `db.get`/`db.all` callback row parameters.
 - **Code regions**: Sections are wrapped with `//-----------------------------\n//#region Name` and `//#endregion Name` comments. Follow this pattern when adding new sections.
-- **Error handling**: All `db.js` functions use the same pattern — log the error, return `res.status(400).json({ error: err.message })`. Use `res.sendStatus(404)` when a record is not found.
-- **Module exports**: `db.js` and `search.js` use `module.exports = { fn1, fn2 }` at the bottom of the file.
-- **No TypeScript**: Plain CommonJS JavaScript (`require`/`module.exports`).
-- **No `.env` file**: Port is hardcoded as `3999` in `index.js`. No secrets are stored in the repo.
+- **Error handling**: All `db.ts` functions use the same pattern — `console.error` the message, then `res.status(400).json({ error: err.message })`. Use `res.sendStatus(404)` when a record is not found.
+- **sqlite3 `this.lastID`**: Use a regular `function` callback (not an arrow function) in `db.run` calls so that `this` refers to the `RunResult` object.
+- **No `.env` file**: Port is hardcoded as `3999` in `src/index.ts`. No secrets are stored in the repo.
 
 ## Dependencies
 
@@ -131,16 +149,19 @@ To add a new allowed origin, add it to the `allowedOrigins` array in `index.js`.
 |---|---|
 | `express` ^4.18.2 | HTTP routing |
 | `sqlite3` ^5.1.4 | SQLite database driver |
-| `bcrypt` ^5.1.0 | Password hashing (imported in `index.js` but not yet used — reserved for auth) |
+| `bcrypt` ^5.1.0 | Password hashing (imported in `src/index.ts` but not yet used — reserved for auth) |
+| `typescript` | TypeScript compiler |
+| `ts-node` | Run TypeScript directly in development |
 | `nodemon` ^3.1.9 | Dev-only auto-reload |
+| `@types/express`, `@types/node`, `@types/bcrypt`, `@types/sqlite3` | Type declarations |
 
-`bcrypt` is already imported in `index.js`. When implementing authentication, use it there — do not install an alternative hashing library.
+`bcrypt` is already imported in `src/index.ts`. When implementing authentication, use it there — do not install an alternative hashing library.
 
 ## Known Gaps / Future Work
 
 - **Authentication**: `bcrypt` is imported but unused. A login endpoint and session/token mechanism need to be added.
-- **cart.js**: Empty placeholder. No design exists yet for this feature.
+- **cart.ts**: Empty placeholder. No design exists yet for this feature.
 - **Trade status updates**: `claim`, `cancel`, `deliver` PUT endpoints are documented but not implemented.
-- **No tests**: No test framework is set up. If adding tests, `jest` + `supertest` are natural choices for this Express stack.
+- **No tests**: No test framework is set up. If adding tests, `jest` + `supertest` + `@types/jest` are natural choices for this Express/TypeScript stack.
 - **No input validation on trade creation**: `createTrade` does not validate that `lender_id`, `borrower_id`, and `book_id` are present or valid before running the INSERT.
 - **Search uses JSON body on GET requests**: This is unconventional (most clients don't send bodies with GET). Consider migrating to query parameters (e.g., `?author=tolkien`) in a future refactor.
